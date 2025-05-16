@@ -1,0 +1,41 @@
+{
+  "name": "node-win-file-attrib",
+  "version": "0.0.1",
+  "description": "Windows File Attribute Query And Update Wrapper",
+  "keywords": [
+    "win32",
+    "NtQueryDirectoryFileEx",
+    "GetFileAttributes",
+    "SetFileAttributes"
+  ],
+  "main": "dist/index.js",
+  "os": ["win32"],
+  "gypfile": true,
+  "license": "MIT",
+  "files": [
+    "binding.gyp",
+    "src/win32/",
+    "dist/"
+  ],
+  "scripts": {
+    "configure": "node-gyp configure",
+    "_build": "node-gyp build && tsc && npm run pretty",
+    "build-ts": "tsc && npm run pretty",
+    "pretty": "prettier --write binding.gyp --parser json && npm run pretty-code",
+    "pretty-code": "prettier -u --write src/**/*.ts dist/**/*.js dist/**/*.ts example/**/* && clang-format -i src/win32/*",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "node-addon-api": "^8.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.13.0",
+    "@types/eslint__js": "8.42.3",
+    "@types/node": "^22.7.7",
+    "@typescript-eslint/parser": "8.10.0",
+    "eslint": "9.13.0",
+    "typescript": "5.6.3",
+    "typescript-eslint": "8.10.0"
+  }
+}
