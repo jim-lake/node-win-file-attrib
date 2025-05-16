@@ -7,12 +7,12 @@ export default _default;
 export declare function getAttributes(
   path: string,
   done: (err: Error | null, attributes: number) => void
-): any;
+): void;
 export declare function setAttributes(
   path: string,
   attributes: number,
   done?: (err: Error | null) => void
-): any;
+): void;
 type WindowsDirent = {
   name: string;
   size: number;
@@ -23,4 +23,4 @@ type WindowsDirent = {
 export declare function queryDirectory(
   path: string,
   done: (err: Error | null, files: WindowsDirent[]) => void
-): any;
+): void;

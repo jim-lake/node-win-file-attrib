@@ -6,14 +6,20 @@ export function getAttributes(
   path: string,
   done: (err: Error | null, attributes: number) => void
 ) {
-  return addon.getAttributes(path, done);
+  const error = addon.getAttributes(path, done);
+  if (error) {
+    throw new Error(error);
+  }
 }
 export function setAttributes(
   path: string,
   attributes: number,
   done?: (err: Error | null) => void
 ) {
-  return addon.setAttributes(path, attributes, (err) => done?.(err));
+  const error = addon.setAttributes(path, attributes, (err) => done?.(err));
+  if (error) {
+    throw new Error(error);
+  }
 }
 type WindowsDirent = {
   name: string;
@@ -26,5 +32,8 @@ export function queryDirectory(
   path: string,
   done: (err: Error | null, files: WindowsDirent[]) => void
 ) {
-  return addon.queryDirectory(path, done);
+  const error = addon.queryDirectory(path, done);
+  if (error) {
+    throw new Error(error);
+  }
 }

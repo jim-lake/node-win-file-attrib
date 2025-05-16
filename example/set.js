@@ -3,7 +3,7 @@ const FileAttrib = require('../dist/index.js');
 const path = process.argv[2];
 const attributes = parseInt(process.argv[3]);
 
-if (!path && !isNaN(attributes)) {
+if (!path || isNaN(attributes)) {
   console.log('Usage: set <path> <atrributes>');
   process.exit(-1);
 }

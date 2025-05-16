@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "configure": "node-gyp configure",
-    "_build": "node-gyp build && tsc && npm run pretty",
+    "build": "node-gyp build && tsc && npm run pretty",
     "build-ts": "tsc && npm run pretty",
     "pretty": "prettier --write binding.gyp --parser json && npm run pretty-code",
     "pretty-code": "prettier -u --write src/**/*.ts dist/**/*.js dist/**/*.ts example/**/* && clang-format -i src/win32/*",

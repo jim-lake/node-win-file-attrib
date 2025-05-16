@@ -44,7 +44,35 @@ private:
   int _attributes;
   int _errno;
 };
+class GetWorker : public AsyncWorker {
+public:
+  GetWorker(const Function &callback, const std::string &path)
+      : AsyncWorker(callback, "getAttributes"), _path(path), _errno(0) {}
 
+  ~GetWorker() {}
+  void Execute() override {
+    const auto wstr = stringToWString(this->_path);
+    this->_attributes = GetFileAttributesW(wstr.c_str());
+    if (this->_attributes == INVALID_FILE_ATTRIBUTES) {
+      this->_errno = GetLastError();
+      SetError("Failed");
+    }
+  }
+  void OnOK() override {
+    HandleScope scope(Env());
+    Callback().Call({Env().Null(), Number::New(Env(), this->_attributes)});
+  }
+  void OnError(const Napi::Error &error) override {
+    HandleScope scope(Env());
+    error.Set("errno", Number::New(Env(), this->_errno));
+    AsyncWorker::OnError(error);
+  }
+
+private:
+  std::string _path;
+  int _attributes;
+  int _errno;
+};
 Value SetAttributes(const Napi::CallbackInfo &info) {
   const Napi::Env env = info.Env();
   Value ret = env.Null();
@@ -66,8 +94,27 @@ Value SetAttributes(const Napi::CallbackInfo &info) {
   }
   return ret;
 }
+Value GetAttributes(const Napi::CallbackInfo &info) {
+  const Napi::Env env = info.Env();
+  Value ret = env.Null();
+
+  if (info.Length() != 2) {
+    ret = String::New(env, "Expected 2 arguments");
+  } else if (!info[0].IsString()) {
+    ret = String::New(env, "Expected string arg 0");
+  } else if (!info[1].IsFunction()) {
+    ret = String::New(env, "Expected function arg 1");
+  } else {
+    const auto path = info[0].As<String>();
+    const auto cb = info[1].As<Function>();
+    const auto worker = new GetWorker(cb, path);
+    worker->Queue();
+  }
+  return ret;
+}
 Object Init(Napi::Env env, Object exports) {
   exports.Set("setAttributes", Function::New(env, SetAttributes));
+  exports.Set("getAttributes", Function::New(env, GetAttributes));
   return exports;
 }
 NODE_API_MODULE(NODE_GYP_MODULE_NAME, Init)
