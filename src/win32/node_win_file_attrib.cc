@@ -6,35 +6,36 @@
 
 using namespace Napi;
 
-static std::wstring stringToWString(const std::string& str) {
-  if (str.empty()) return std::wstring();
+static std::wstring stringToWString(const std::string &str) {
+  if (str.empty())
+    return std::wstring();
 
-  const int size_needed = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0);
-  std::wstring ret(size_needed, 0);
-  MultiByteToWideChar(CP_UTF8, 0, ret.c_str(), -1, &ret[0], size_needed);
+  const int needed =
+      MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
+  std::wstring ret(needed, L'\0');
+  MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &ret[0], needed);
   return ret;
 }
 
 class SetWorker : public AsyncWorker {
 public:
   SetWorker(const Function &callback, const std::string &path,
-              const int attributes)
+            const int attributes)
       : AsyncWorker(callback, "setAttributes"), _path(path),
-        _attributes(flags), _errno(0) {}
+        _attributes(attributes), _errno(0) {}
 
   ~SetWorker() {}
   void Execute() override {
-    const wstr = stringToWString(this._path);
+    const auto wstr = stringToWString(this->_path);
     const auto success = SetFileAttributesW(wstr.c_str(), this->_attributes);
     if (!success) {
-      this._errno = GetLastError();
+      this->_errno = GetLastError();
       SetError("Failed");
     }
   }
   void OnError(const Napi::Error &error) override {
     HandleScope scope(Env());
     error.Set("errno", Number::New(Env(), this->_errno));
-    error.Set("code", String::New(Env(), _errorToCode(this->_errno)));
     AsyncWorker::OnError(error);
   }
 
