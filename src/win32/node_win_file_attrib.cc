@@ -61,7 +61,35 @@ public:
 
   ~GetWorker() {}
   void Execute() override {
+    OBJECT_ATTRIBUTES attribs;
 
+    OBJECT_ATTRIBUTES attribs{};
+    const auto len = this._path.length();
+    const auto Length = static_cast<USHORT>(len * sizeof(wchar_t));
+    UNICODE_STRING ustring{
+        .Length = Length,
+        .MaximumLength = Length + sizeof(wchar_t),
+        .Buffer = this._path.c_str(),
+    };
+    InitializeObjectAttributes(&attribs, &ustring, OBJ_CASE_INSENSITIVE, NULL,
+                               NULL);
+
+    IO_STATUS_BLOCK io_status{0};
+    FILE_STAT_INFORMATION info;
+    const NTSTATUS status = NtQueryInformationByName(
+        &attribs, &io_status, &info, sizeof(info), FileStatInformation);
+    printf("status: 0x%x\n", status);
+    if (status == STATUS_SUCCESS) {
+      this->_size = info.EndOfFile.QuadPart;
+      this->_attributes = info.FileAttributes;
+      this->_cTimeMs = _filetimeToUnixMs(info.ChangeTime.QuadPart);
+      this->_mTimeMs = _filetimeToUnixMs(info.LastWriteTime.QuadPart);
+    } else {
+      this._errno = status;
+      SetError('Query Failed');
+    }
+
+    /*
     if (pGetFileInformationByName == NULL) {
       HANDLE h_file = CreateFileW(
           reinterpret_cast<LPCWSTR>(this->_path.c_str()), GENERIC_READ,
@@ -103,7 +131,7 @@ public:
         this->_errno = GetLastError();
         SetError("Failed");
       }
-    }
+    }*/
   }
   void OnOK() override {
     HandleScope scope(Env());
