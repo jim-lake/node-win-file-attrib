@@ -7,13 +7,13 @@ declare const _default: {
 export default _default;
 type GetResult = {
   size: number;
-  mtimeMs: number;
-  ctimeMs: number;
   attributes: number;
+  ctimeMs: number;
+  mtimeMs: number;
 };
 export declare function getAttributes(
   path: string,
-  done: (err: Error | null, attributes: GetResult) => void
+  done: (err: Error | null, result: GetResult) => void
 ): void;
 export declare function setAttributes(
   path: string,
@@ -23,9 +23,9 @@ export declare function setAttributes(
 type WindowsDirent = {
   name: string;
   size: number;
-  mtimeMs: number;
-  ctimeMs: number;
   attributes: number;
+  ctimeMs: number;
+  mtimeMs: number;
 };
 export declare function queryDirectory(
   path: string,

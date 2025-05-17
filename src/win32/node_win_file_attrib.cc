@@ -27,17 +27,6 @@ typedef struct {
   double mTimeMs;
 } WindowsDirent;
 
-static std::wstring stringToWString(const std::string &str) {
-  if (str.empty())
-    return std::wstring();
-
-  const int needed =
-      MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
-  std::wstring ret(needed, L'\0');
-  MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &ret[0], needed);
-  return ret;
-}
-
 class SetWorker : public AsyncWorker {
 public:
   SetWorker(const Function &callback, const std::u16string &path,

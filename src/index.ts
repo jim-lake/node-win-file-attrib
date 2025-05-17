@@ -4,14 +4,13 @@ export default { getAttributes, setAttributes, queryDirectory, _slowApi };
 
 type GetResult = {
   size: number;
-  mtimeMs: number;
-  ctimeMs: number;
   attributes: number;
+  ctimeMs: number;
+  mtimeMs: number;
 };
-
 export function getAttributes(
   path: string,
-  done: (err: Error | null, attributes: GetResult) => void
+  done: (err: Error | null, result: GetResult) => void
 ) {
   const error = addon.getAttributes(path, done);
   if (error) {
@@ -31,9 +30,9 @@ export function setAttributes(
 type WindowsDirent = {
   name: string;
   size: number;
-  mtimeMs: number;
-  ctimeMs: number;
   attributes: number;
+  ctimeMs: number;
+  mtimeMs: number;
 };
 export function queryDirectory(
   path: string,
