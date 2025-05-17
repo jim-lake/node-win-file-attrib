@@ -1,5 +1,24 @@
 #pragma once
 #include <windows.h>
+#include <winternl.h>
+
+typedef struct _IO_STATUS_BLOCK {
+  union {
+    NTSTATUS Status;
+    PVOID Pointer;
+  };
+  ULONG_PTR Information;
+} IO_STATUS_BLOCK, *PIO_STATUS_BLOCK;
+
+typedef enum _FILE_INFORMATION_CLASS {
+  FileDirectoryInformation = 1
+} FILE_INFORMATION_CLASS;
+
+typedef enum _NT_DIRECTORY_QUERY_FLAGS {
+  SL_RESTART_SCAN = 0x01,
+  SL_RETURN_SINGLE_ENTRY = 0x02,
+  SL_INDEX_SPECIFIED = 0x04
+} NT_DIRECTORY_QUERY_FLAGS;
 
 typedef struct _FILE_STAT_BASIC_INFORMATION {
   LARGE_INTEGER FileId;
@@ -18,6 +37,7 @@ typedef struct _FILE_STAT_BASIC_INFORMATION {
   LARGE_INTEGER VolumeSerialNumber;
   FILE_ID_128 FileId128;
 } FILE_STAT_BASIC_INFORMATION, *PFILE_STAT_BASIC_INFORMATION;
+
 typedef enum _FILE_INFO_BY_NAME_CLASS {
   FileStatByNameInfo,
   FileStatLxByNameInfo,

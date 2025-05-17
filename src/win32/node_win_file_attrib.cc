@@ -1,9 +1,9 @@
-#include <napi.h>
-
 #define WIN32_LEAN_AND_MEAN
 #define NTDDI_VERSION NTDDI_WIN7
-#include <windows.h>
+
 #include "extra.h"
+#include <napi.h>
+#include <windows.h>
 
 #define NSEC_PER_TICK 100
 #define TICKS_PER_MSEC 10000
@@ -76,7 +76,7 @@ public:
     if (success) {
       this->_dev = info.VolumeSerialNumber.QuadPart;
       this->_size = info.EndOfFile.QuadPart;
-      this->_attributes = info.FileAttributes.QuadPart;
+      this->_attributes = info.FileAttributes;
       this->_mTimeMs = _filetimeToUnixMs(info.LastWriteTime.QuadPart);
       this->_cTimeMs = _filetimeToUnixMs(info.ChangeTime.QuadPart);
     } else {
@@ -117,10 +117,9 @@ public:
 
   ~QueryWorker() {}
   void Execute() override {
-    const auto wdir = stringToWString(this->_path);
 
     HANDLE h_dir = CreateFileW(
-        wdir.c_str(), FILE_LIST_DIRECTORY,
+        this->_path.c_str(), FILE_LIST_DIRECTORY,
         FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
         OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
 
@@ -151,7 +150,7 @@ public:
             if (status == STATUS_NO_MORE_FILES) {
               break;
             } else if (!NT_SUCCESS(status)) {
-              SetError('Continue Failed') break;
+              SetError("Continue Failed") break;
             } else {
               curr = buffer;
             }
