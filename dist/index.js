@@ -4,10 +4,12 @@ exports.getAttributes = getAttributes;
 exports.setAttributes = setAttributes;
 exports.queryDirectory = queryDirectory;
 exports._slowApi = _slowApi;
+const node_path_1 = require('node:path');
 const addon = require('../build/Release/node_win_file_attrib.node');
 exports.default = { getAttributes, setAttributes, queryDirectory, _slowApi };
 function getAttributes(path, done) {
-  const error = addon.getAttributes(path, done);
+  const full = '\\??\\' + (0, node_path_1.resolve)(path);
+  const error = addon.getAttributes(full, done);
   if (error) {
     throw new Error(error);
   }

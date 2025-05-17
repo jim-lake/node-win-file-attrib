@@ -12,11 +12,11 @@ console.log('set:', path, '0x' + attributes.toString(16));
 try {
   FileAttrib.setAttributes(path, attributes, (err) => {
     if (err) {
-      console.error('failed:', err);
+      console.error('failed:', err, err?.errno?.toString?.(16));
     } else {
       console.log('success');
     }
   });
 } catch (e) {
-  console.error('threw:', e?.errno, e);
+  console.error('threw:', e?.errno?.toString?.(16), e);
 }

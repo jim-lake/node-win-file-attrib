@@ -1,3 +1,4 @@
+import { resolve as pathResolve } from 'node:path';
 const addon = require('../build/Release/node_win_file_attrib.node');
 
 export default { getAttributes, setAttributes, queryDirectory, _slowApi };
@@ -12,7 +13,8 @@ export function getAttributes(
   path: string,
   done: (err: Error | null, result: GetResult) => void
 ) {
-  const error = addon.getAttributes(path, done);
+  const full = '\\??\\' + pathResolve(path);
+  const error = addon.getAttributes(full, done);
   if (error) {
     throw new Error(error);
   }

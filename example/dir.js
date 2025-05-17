@@ -11,12 +11,12 @@ console.log('dir:', path);
 try {
   FileAttrib.queryDirectory(path, (err, list) => {
     if (err) {
-      console.error('failed:', err);
+      console.error('failed:', err, err?.errno?.toString?.(16));
     } else {
       console.log('success:', list.length, 'items');
       console.log(list);
     }
   });
 } catch (e) {
-  console.error('threw:', e?.errno, e);
+  console.error('threw:', e?.errno?.toString?.(16), e);
 }
