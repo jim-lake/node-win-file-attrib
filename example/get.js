@@ -9,11 +9,11 @@ if (!path) {
 
 console.log('get:', path);
 try {
-  FileAttrib.getAttributes(path, (err, attributes) => {
+  FileAttrib.getAttributes(path, (err, result) => {
     if (err) {
       console.error('failed:', err);
     } else {
-      console.log('success: 0x' + attributes.toString(16));
+      console.log('success:', result);
     }
   });
 } catch (e) {

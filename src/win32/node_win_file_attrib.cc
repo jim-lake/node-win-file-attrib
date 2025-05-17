@@ -10,9 +10,9 @@
 #define TICKS_PER_SEC ((int64_t)1e9 / NSEC_PER_TICK)
 static const int64_t WIN_TO_UNIX_TICK_OFFSET = 11644473600 * TICKS_PER_SEC;
 
-static inline uint64_t _filetimeToUnixMs(int64_t filetime) {
+static inline double _filetimeToUnixMs(int64_t filetime) {
   filetime -= WIN_TO_UNIX_TICK_OFFSET;
-  return filetime / TICKS_PER_MSEC;
+  return double(filetime) / TICKS_PER_MSEC;
 }
 
 static sGetFileInformationByName pGetFileInformationByName = NULL;
@@ -74,16 +74,19 @@ public:
   void Execute() override {
 
     if (pGetFileInformationByName == NULL) {
+      printf("old path\n");
       HANDLE h_file = CreateFileW(
           reinterpret_cast<LPCWSTR>(this->_path.c_str()), GENERIC_READ,
           FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
       if (h_file != INVALID_HANDLE_VALUE) {
-        HANDLE_FILE_INFORMATION info;
+        BY_HANDLE_FILE_INFORMATION info;
         const auto success = GetFileInformationByHandle(h_file, &info);
         if (success) {
           this->_dev = info.dwVolumeSerialNumber;
-          this->_size = info.nFileSizeHigh << 32 + info.nFileSizeLow;
+          this->_size = info.nFileSizeHigh;
+          this->_size <<= 32;
+          this->_size += info.nFileSizeLow;
           this->_attributes = info.dwFileAttributes;
           this->_mTimeMs =
               _filetimeToUnixMs(*((int64_t *)&info.ftLastWriteTime));
@@ -98,6 +101,7 @@ public:
         SetError("Open Failed");
       }
     } else {
+      printf("new path\n");
       FILE_STAT_BASIC_INFORMATION info;
       const auto success = pGetFileInformationByName(
           reinterpret_cast<LPCWSTR>(this->_path.c_str()),
@@ -135,8 +139,8 @@ private:
   int64_t _dev;
   uint64_t _size;
   int _attributes;
-  uint64_t _mTimeMs;
-  uint64_t _cTimeMs;
+  double _mTimeMs;
+  double _cTimeMs;
   int _errno;
 };
 

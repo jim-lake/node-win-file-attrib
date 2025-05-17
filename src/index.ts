@@ -2,9 +2,16 @@ const addon = require('../build/Release/node_win_file_attrib.node');
 
 export default { getAttributes, setAttributes, queryDirectory };
 
+type GetResult = {
+  size: number;
+  mtimeMs: number;
+  ctimeMs: number;
+  attributes: number;
+};
+
 export function getAttributes(
   path: string,
-  done: (err: Error | null, attributes: number) => void
+  done: (err: Error | null, attributes: GetResult) => void
 ) {
   const error = addon.getAttributes(path, done);
   if (error) {

@@ -4,9 +4,15 @@ declare const _default: {
   queryDirectory: typeof queryDirectory;
 };
 export default _default;
+type GetResult = {
+  size: number;
+  mtimeMs: number;
+  ctimeMs: number;
+  attributes: number;
+};
 export declare function getAttributes(
   path: string,
-  done: (err: Error | null, attributes: number) => void
+  done: (err: Error | null, attributes: GetResult) => void
 ): void;
 export declare function setAttributes(
   path: string,
