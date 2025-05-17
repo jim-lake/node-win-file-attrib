@@ -1,3 +1,6 @@
+#pragma once
+#include <windows.h>
+
 typedef struct _FILE_STAT_BASIC_INFORMATION {
   LARGE_INTEGER FileId;
   LARGE_INTEGER CreationTime;
