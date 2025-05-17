@@ -2,8 +2,8 @@
 
 #define WIN32_LEAN_AND_MEAN
 #define NTDDI_VERSION NTDDI_WIN7
-#include <windows.h>
 #include "extra.h"
+#include <windows.h>
 
 #define NSEC_PER_TICK 100
 #define TICKS_PER_MSEC 10000
@@ -74,11 +74,11 @@ public:
     const auto success = GetFileInformationByName(
         this->_path.c_str(), FileStatBasicByNameInfo, &info, sizeof(info));
     if (success) {
-      this->_dev = info.VolumeSerialNumber;
-      this->_size = info.EndOfFile;
-      this->_attributes = info.FileAttributes;
-      this->_mTimeMs = _filetimeToUnixMs(info.LastWriteTime);
-      this->_cTimeMs = _filetimeToUnixMs(info.ChangeTime);
+      this->_dev = info.VolumeSerialNumber.QuadPart;
+      this->_size = info.EndOfFile.QuadPart;
+      this->_attributes = info.FileAttributes.QuadPart;
+      this->_mTimeMs = _filetimeToUnixMs(info.LastWriteTime.QuadPart);
+      this->_cTimeMs = _filetimeToUnixMs(info.ChangeTime.QuadPart);
     } else {
       this->_errno = GetLastError();
       SetError("Failed");
@@ -87,11 +87,11 @@ public:
   void OnOK() override {
     HandleScope scope(Env());
     const auto obj = Object::New(Env());
-    obj.Set("dev", Number::New(env, this->_dev));
-    obj.Set("size", Number::New(env, this->_size));
-    obj.Set("attributes", Number::New(env, this->_attributes));
-    obj.Set("mTimeMs", Number::New(env, this->_mTimeMs));
-    obj.Set("cTimeMs", Number::New(env, this->_cTimeMs));
+    obj.Set("dev", Number::New(Env(), this->_dev));
+    obj.Set("size", Number::New(Env(), this->_size));
+    obj.Set("attributes", Number::New(Env(), this->_attributes));
+    obj.Set("mTimeMs", Number::New(Env(), this->_mTimeMs));
+    obj.Set("cTimeMs", Number::New(Env(), this->_cTimeMs));
     Callback().Call({Env().Null(), obj});
   }
   void OnError(const Napi::Error &error) override {
