@@ -16,13 +16,13 @@ static inline uint64_t _filetimeToUnixMs(int64_t filetime) {
 
 using namespace Napi;
 
-typedef struct WindowsDirent {
+typedef struct {
   std::wstring filename;
   uint64_t size;
   int attributes;
   uint64_t cTimeMs;
   uint64_t mTimeMs;
-};
+} WindowsDirent;
 
 static std::wstring stringToWString(const std::string &str) {
   if (str.empty())
@@ -37,7 +37,7 @@ static std::wstring stringToWString(const std::string &str) {
 
 class SetWorker : public AsyncWorker {
 public:
-  SetWorker(const Function &callback, const std::string &path,
+  SetWorker(const Function &callback, const std::wstring &path,
             const int attributes)
       : AsyncWorker(callback, "setAttributes"), _path(path),
         _attributes(attributes), _errno(0) {}
@@ -64,7 +64,7 @@ private:
 };
 class GetWorker : public AsyncWorker {
 public:
-  GetWorker(const Function &callback, const std::string &path)
+  GetWorker(const Function &callback, const std::wstring &path)
       : AsyncWorker(callback, "getAttributes"), _path(path), _errno(0) {}
 
   ~GetWorker() {}
@@ -111,7 +111,7 @@ private:
 
 class QueryWorker : public AsyncWorker {
 public:
-  QueryWorker(const Function &callback, const std::string &path)
+  QueryWorker(const Function &callback, const std::wstring &path)
       : AsyncWorker(callback, "queryDirectory"), _path(path), _errno(0) {}
 
   ~QueryWorker() {}
