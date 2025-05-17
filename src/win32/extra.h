@@ -43,6 +43,22 @@ typedef struct _FILE_STAT_BASIC_INFORMATION {
   FILE_ID_128 FileId128;
 } FILE_STAT_BASIC_INFORMATION, *PFILE_STAT_BASIC_INFORMATION;
 
+typedef struct _FILE_STAT_INFORMATION {
+  LARGE_INTEGER FileId;
+  LARGE_INTEGER CreationTime;
+  LARGE_INTEGER LastAccessTime;
+  LARGE_INTEGER LastWriteTime;
+  LARGE_INTEGER ChangeTime;
+  LARGE_INTEGER AllocationSize;
+  LARGE_INTEGER EndOfFile;
+  ULONG FileAttributes;
+  ULONG ReparseTag;
+  ULONG NumberOfLinks;
+  ACCESS_MASK EffectiveAccess;
+} FILE_STAT_INFORMATION, *PFILE_STAT_INFORMATION;
+
+constexpr DWORD FileStatInformation = 68;
+
 typedef enum _FILE_INFO_BY_NAME_CLASS {
   FileStatByNameInfo,
   FileStatLxByNameInfo,
