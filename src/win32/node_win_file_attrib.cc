@@ -38,15 +38,15 @@ static std::wstring stringToWString(const std::string &str) {
 
 class SetWorker : public AsyncWorker {
 public:
-  SetWorker(const Function &callback, const std::wstring &path,
+  SetWorker(const Function &callback, const std::u16string &path,
             const int attributes)
       : AsyncWorker(callback, "setAttributes"), _path(path),
         _attributes(attributes), _errno(0) {}
 
   ~SetWorker() {}
   void Execute() override {
-    const auto success =
-        SetFileAttributesW(this->_path.c_str(), this->_attributes);
+    const auto success = SetFileAttributesW(
+        reinterpret_cast<LPCWSTR>(this->_path.c_str()), this->_attributes);
     if (!success) {
       this->_errno = GetLastError();
       SetError("Failed");
@@ -59,20 +59,21 @@ public:
   }
 
 private:
-  std::wstring _path;
+  std::u16string _path;
   int _attributes;
   int _errno;
 };
 class GetWorker : public AsyncWorker {
 public:
-  GetWorker(const Function &callback, const std::wstring &path)
+  GetWorker(const Function &callback, const std::u16string &path)
       : AsyncWorker(callback, "getAttributes"), _path(path), _errno(0) {}
 
   ~GetWorker() {}
   void Execute() override {
     FILE_STAT_BASIC_INFORMATION info;
-    const auto success = GetFileInformationByName(
-        this->_path.c_str(), FileStatBasicByNameInfo, &info, sizeof(info));
+    const auto success =
+        GetFileInformationByName(reinterpret_cast<LPCWSTR>(this->_path.c_str()),
+                                 FileStatBasicByNameInfo, &info, sizeof(info));
     if (success) {
       this->_dev = info.VolumeSerialNumber.QuadPart;
       this->_size = info.EndOfFile.QuadPart;
@@ -101,7 +102,7 @@ public:
   }
 
 private:
-  std::wstring _path;
+  std::u16string _path;
   int64_t _dev;
   uint64_t _size;
   int _attributes;
@@ -112,14 +113,14 @@ private:
 
 class QueryWorker : public AsyncWorker {
 public:
-  QueryWorker(const Function &callback, const std::wstring &path)
+  QueryWorker(const Function &callback, const std::u16string &path)
       : AsyncWorker(callback, "queryDirectory"), _path(path), _errno(0) {}
 
   ~QueryWorker() {}
   void Execute() override {
 
     HANDLE h_dir = CreateFileW(
-        this->_path.c_str(), FILE_LIST_DIRECTORY,
+        reinterpret_cast<LPCWSTR>(this->_path.c_str()), FILE_LIST_DIRECTORY,
         FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
         OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
 
@@ -150,7 +151,8 @@ public:
             if (status == STATUS_NO_MORE_FILES) {
               break;
             } else if (!NT_SUCCESS(status)) {
-              SetError("Continue Failed") break;
+              SetError("Continue Failed");
+              break;
             } else {
               curr = buffer;
             }
@@ -171,7 +173,7 @@ public:
   }
 
 private:
-  std::wstring _path;
+  std::u16string _path;
   std::vector<WindowsDirent> _results;
   int _attributes;
   int _errno;

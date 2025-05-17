@@ -2,12 +2,6 @@
 #include <windows.h>
 #include <winternl.h>
 
-typedef struct _UNICODE_STRING {
-  USHORT Length;
-  USHORT MaximumLength;
-  PWSTR Buffer;
-} UNICODE_STRING, *PUNICODE_STRING;
-
 constexpr NTSTATUS STATUS_NO_MORE_FILES = 0x80000006;
 constexpr NTSTATUS STATUS_NO_SUCH_FILE = 0xC000000F;
 
@@ -71,5 +65,5 @@ NTSYSCALLAPI NTSTATUS NTAPI NtQueryDirectoryFileEx(
     PIO_STATUS_BLOCK IoStatusBlock, PVOID FileInformation, ULONG Length,
     DWORD FileInformationClass, ULONG QueryFlags, PUNICODE_STRING FileName);
 }
-
-#pragma comment(lib, "api-ms-win-core-file-l2-1-4.dll")
+#pragma comment(lib, "ntdll.lib")
+#pragma comment(lib, "Kernel32.lib")
