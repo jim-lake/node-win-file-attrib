@@ -56,14 +56,14 @@ typedef BOOL(WINAPI *sGetFileInformationByName)(
     PVOID FileInfoBuffer, ULONG FileInfoBufferSize);
 
 extern "C" {
-BOOL WINAPI GetFileInformationByName(
-    PCWSTR FileName, FILE_INFO_BY_NAME_CLASS FileInformationClass,
-    PVOID FileInfoBuffer, ULONG FileInfoBufferSize);
-
 NTSYSCALLAPI NTSTATUS NTAPI NtQueryDirectoryFileEx(
     HANDLE FileHandle, HANDLE Event, PVOID ApcRoutine, PVOID ApcContext,
     PIO_STATUS_BLOCK IoStatusBlock, PVOID FileInformation, ULONG Length,
     DWORD FileInformationClass, ULONG QueryFlags, PUNICODE_STRING FileName);
+
+NTSYSCALLAPI NTSTATUS NtQueryInformationByName(
+    POBJECT_ATTRIBUTES ObjectAttributes, PIO_STATUS_BLOCK IoStatusBlock,
+    PVOID FileInformation, ULONG Length,
+    FILE_INFORMATION_CLASS FileInformationClass);
 }
 #pragma comment(lib, "ntdll.lib")
-#pragma comment(lib, "Kernel32.lib")

@@ -15,6 +15,8 @@ static inline uint64_t _filetimeToUnixMs(int64_t filetime) {
   return filetime / TICKS_PER_MSEC;
 }
 
+static sGetFileInformationByName pGetFileInformationByName = NULL;
+
 using namespace Napi;
 
 typedef struct {
@@ -70,19 +72,46 @@ public:
 
   ~GetWorker() {}
   void Execute() override {
-    FILE_STAT_BASIC_INFORMATION info;
-    const auto success =
-        GetFileInformationByName(reinterpret_cast<LPCWSTR>(this->_path.c_str()),
-                                 FileStatBasicByNameInfo, &info, sizeof(info));
-    if (success) {
-      this->_dev = info.VolumeSerialNumber.QuadPart;
-      this->_size = info.EndOfFile.QuadPart;
-      this->_attributes = info.FileAttributes;
-      this->_mTimeMs = _filetimeToUnixMs(info.LastWriteTime.QuadPart);
-      this->_cTimeMs = _filetimeToUnixMs(info.ChangeTime.QuadPart);
+
+    if (pGetFileInformationByName == NULL) {
+      HANDLE h_file = CreateFileW(
+          reinterpret_cast<LPCWSTR>(this->_path.c_str()), GENERIC_READ,
+          FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+
+      if (h_file != INVALID_HANDLE_VALUE) {
+        HANDLE_FILE_INFORMATION info;
+        const auto success = GetFileInformationByHandle(h_file, &info);
+        if (success) {
+          this->_dev = info.dwVolumeSerialNumber;
+          this->_size = info.nFileSizeHigh << 32 + info.nFileSizeLow;
+          this->_attributes = info.dwFileAttributes;
+          this->_mTimeMs =
+              _filetimeToUnixMs(*((int64_t *)&info.ftLastWriteTime));
+          this->_cTimeMs = this->_mTimeMs;
+        } else {
+          this->_errno = GetLastError();
+          SetError("Failed");
+        }
+        CloseHandle(h_file);
+      } else {
+        this->_errno = GetLastError();
+        SetError("Open Failed");
+      }
     } else {
-      this->_errno = GetLastError();
-      SetError("Failed");
+      FILE_STAT_BASIC_INFORMATION info;
+      const auto success = pGetFileInformationByName(
+          reinterpret_cast<LPCWSTR>(this->_path.c_str()),
+          FileStatBasicByNameInfo, &info, sizeof(info));
+      if (success) {
+        this->_dev = info.VolumeSerialNumber.QuadPart;
+        this->_size = info.EndOfFile.QuadPart;
+        this->_attributes = info.FileAttributes;
+        this->_mTimeMs = _filetimeToUnixMs(info.LastWriteTime.QuadPart);
+        this->_cTimeMs = _filetimeToUnixMs(info.ChangeTime.QuadPart);
+      } else {
+        this->_errno = GetLastError();
+        SetError("Failed");
+      }
     }
   }
   void OnOK() override {
@@ -236,6 +265,13 @@ Value QueryDirectory(const Napi::CallbackInfo &info) {
   return ret;
 }
 Object Init(Napi::Env env, Object exports) {
+  HMODULE api_win_core_file_module =
+      GetModuleHandleA("api-ms-win-core-file-l2-1-4.dll");
+  if (api_win_core_file_module != NULL) {
+    pGetFileInformationByName = (sGetFileInformationByName)GetProcAddress(
+        api_win_core_file_module, "GetFileInformationByName");
+  }
+
   exports.Set("setAttributes", Function::New(env, SetAttributes));
   exports.Set("getAttributes", Function::New(env, GetAttributes));
   exports.Set("queryDirectory", Function::New(env, QueryDirectory));
