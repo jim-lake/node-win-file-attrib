@@ -3,6 +3,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NTDDI_VERSION NTDDI_WIN7
 #include <windows.h>
+#include "extra.h"
 
 #define NSEC_PER_TICK 100
 #define TICKS_PER_MSEC 10000
