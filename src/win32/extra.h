@@ -2,17 +2,28 @@
 #include <windows.h>
 #include <winternl.h>
 
-typedef struct _IO_STATUS_BLOCK {
-  union {
-    NTSTATUS Status;
-    PVOID Pointer;
-  };
-  ULONG_PTR Information;
-} IO_STATUS_BLOCK, *PIO_STATUS_BLOCK;
+typedef struct _UNICODE_STRING {
+  USHORT Length;
+  USHORT MaximumLength;
+  PWSTR Buffer;
+} UNICODE_STRING, *PUNICODE_STRING;
 
-typedef enum _FILE_INFORMATION_CLASS {
-  FileDirectoryInformation = 1
-} FILE_INFORMATION_CLASS;
+constexpr NTSTATUS STATUS_NO_MORE_FILES = 0x80000006;
+constexpr NTSTATUS STATUS_NO_SUCH_FILE = 0xC000000F;
+
+typedef struct _FILE_DIRECTORY_INFORMATION {
+  ULONG NextEntryOffset;
+  ULONG FileIndex;
+  LARGE_INTEGER CreationTime;
+  LARGE_INTEGER LastAccessTime;
+  LARGE_INTEGER LastWriteTime;
+  LARGE_INTEGER ChangeTime;
+  LARGE_INTEGER EndOfFile;
+  LARGE_INTEGER AllocationSize;
+  ULONG FileAttributes;
+  ULONG FileNameLength;
+  WCHAR FileName[1];
+} FILE_DIRECTORY_INFORMATION;
 
 typedef enum _NT_DIRECTORY_QUERY_FLAGS {
   SL_RESTART_SCAN = 0x01,
@@ -50,5 +61,15 @@ typedef BOOL(WINAPI *sGetFileInformationByName)(
     PCWSTR FileName, FILE_INFO_BY_NAME_CLASS FileInformationClass,
     PVOID FileInfoBuffer, ULONG FileInfoBufferSize);
 
-extern sGetFileInformationByName GetFileInformationByName;
+extern "C" {
+BOOL WINAPI GetFileInformationByName(
+    PCWSTR FileName, FILE_INFO_BY_NAME_CLASS FileInformationClass,
+    PVOID FileInfoBuffer, ULONG FileInfoBufferSize);
+
+NTSYSCALLAPI NTSTATUS NTAPI NtQueryDirectoryFileEx(
+    HANDLE FileHandle, HANDLE Event, PVOID ApcRoutine, PVOID ApcContext,
+    PIO_STATUS_BLOCK IoStatusBlock, PVOID FileInformation, ULONG Length,
+    DWORD FileInformationClass, ULONG QueryFlags, PUNICODE_STRING FileName);
+}
+
 #pragma comment(lib, "api-ms-win-core-file-l2-1-4.dll")
