@@ -20,11 +20,11 @@ static sGetFileInformationByName pGetFileInformationByName = NULL;
 using namespace Napi;
 
 typedef struct {
-  std::wstring filename;
+  std::u16string filename;
   uint64_t size;
   int attributes;
-  uint64_t cTimeMs;
-  uint64_t mTimeMs;
+  double cTimeMs;
+  double mTimeMs;
 } WindowsDirent;
 
 static std::wstring stringToWString(const std::string &str) {
@@ -166,14 +166,24 @@ public:
           h_dir, 0, nullptr, nullptr, &ioStatus, buffer, sizeof(buffer),
           FileDirectoryInformation, SL_RESTART_SCAN, nullptr);
 
+      printf("start: 0x%x\n", start);
       if (start != 0) {
         SetError("NtQueryDirectoryFileEx failed");
       } else {
-        int fileCount = 0;
         char *curr = buffer;
         while (true) {
           FILE_DIRECTORY_INFORMATION *info =
               reinterpret_cast<FILE_DIRECTORY_INFORMATION *>(curr);
+
+          this->_results.push_back({
+              .name = std::u16string(
+                  reinterpret_cast<const char16_t *>(info.FileName),
+                  info.FileNameLength),
+              .size = info.EndOfFile.QuadPart,
+              .attributes = info.FileAttributes,
+              .mTimeMs = _filetimeToUnixMs(info.LastWriteTime.QuadPart),
+              .cTimeMs = _filetimeToUnixMs(info.ChangeTime.QuadPart),
+          });
 
           if (info->NextEntryOffset != 0) {
             curr += info->NextEntryOffset;
@@ -197,7 +207,18 @@ public:
   }
   void OnOK() override {
     HandleScope scope(Env());
-    Callback().Call({Env().Null(), Number::New(Env(), this->_attributes)});
+    const auto size = this->_results.size();
+    const auto array = Array::New(Env(), size);
+    for (int i = 0; i < size; i++) {
+      const auto obj = Object::New(Env());
+      obj.Set("name", String::New(Env(), this->_results[i].name));
+      obj.Set("size", Number::New(Env(), this->_results[i].size));
+      obj.Set("attributes", Number::New(Env(), this->_results[i].attributes));
+      obj.Set("mTimeMs", Number::New(Env(), this->_results[i].mTimeMs));
+      obj.Set("cTimeMs", Number::New(Env(), this->_results[i].cTimeMs));
+      array[i] = obj;
+    }
+    Callback().Call({Env().Null(), array});
   }
   void OnError(const Napi::Error &error) override {
     HandleScope scope(Env());
