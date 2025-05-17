@@ -6,8 +6,12 @@ if (!path) {
   console.log('Usage: get <path>');
   process.exit(-1);
 }
+if (FileAttrib._slowApi()) {
+  console.log('slow get:', path);
+} else {
+  console.log('fast get:', path);
+}
 
-console.log('get:', path);
 try {
   FileAttrib.getAttributes(path, (err, result) => {
     if (err) {

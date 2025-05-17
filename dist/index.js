@@ -3,8 +3,9 @@ Object.defineProperty(exports, '__esModule', { value: true });
 exports.getAttributes = getAttributes;
 exports.setAttributes = setAttributes;
 exports.queryDirectory = queryDirectory;
+exports._slowApi = _slowApi;
 const addon = require('../build/Release/node_win_file_attrib.node');
-exports.default = { getAttributes, setAttributes, queryDirectory };
+exports.default = { getAttributes, setAttributes, queryDirectory, _slowApi };
 function getAttributes(path, done) {
   const error = addon.getAttributes(path, done);
   if (error) {
@@ -22,5 +23,8 @@ function queryDirectory(path, done) {
   if (error) {
     throw new Error(error);
   }
+}
+function _slowApi() {
+  return addon?._slowApi;
 }
 //# sourceMappingURL=index.js.map

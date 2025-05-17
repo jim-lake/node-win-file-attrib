@@ -1,6 +1,6 @@
 const addon = require('../build/Release/node_win_file_attrib.node');
 
-export default { getAttributes, setAttributes, queryDirectory };
+export default { getAttributes, setAttributes, queryDirectory, _slowApi };
 
 type GetResult = {
   size: number;
@@ -43,4 +43,7 @@ export function queryDirectory(
   if (error) {
     throw new Error(error);
   }
+}
+export function _slowApi() {
+  return addon?._slowApi;
 }

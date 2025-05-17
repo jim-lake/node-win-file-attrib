@@ -2,6 +2,7 @@ declare const _default: {
   getAttributes: typeof getAttributes;
   setAttributes: typeof setAttributes;
   queryDirectory: typeof queryDirectory;
+  _slowApi: typeof _slowApi;
 };
 export default _default;
 type GetResult = {
@@ -30,3 +31,4 @@ export declare function queryDirectory(
   path: string,
   done: (err: Error | null, files: WindowsDirent[]) => void
 ): void;
+export declare function _slowApi(): any;

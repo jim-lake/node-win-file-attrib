@@ -20,7 +20,7 @@ static sGetFileInformationByName pGetFileInformationByName = NULL;
 using namespace Napi;
 
 typedef struct {
-  std::u16string filename;
+  std::u16string name;
   uint64_t size;
   int attributes;
   double cTimeMs;
@@ -74,7 +74,6 @@ public:
   void Execute() override {
 
     if (pGetFileInformationByName == NULL) {
-      printf("old path\n");
       HANDLE h_file = CreateFileW(
           reinterpret_cast<LPCWSTR>(this->_path.c_str()), GENERIC_READ,
           FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -101,7 +100,6 @@ public:
         SetError("Open Failed");
       }
     } else {
-      printf("new path\n");
       FILE_STAT_BASIC_INFORMATION info;
       const auto success = pGetFileInformationByName(
           reinterpret_cast<LPCWSTR>(this->_path.c_str()),
@@ -110,8 +108,8 @@ public:
         this->_dev = info.VolumeSerialNumber.QuadPart;
         this->_size = info.EndOfFile.QuadPart;
         this->_attributes = info.FileAttributes;
-        this->_mTimeMs = _filetimeToUnixMs(info.LastWriteTime.QuadPart);
         this->_cTimeMs = _filetimeToUnixMs(info.ChangeTime.QuadPart);
+        this->_mTimeMs = _filetimeToUnixMs(info.LastWriteTime.QuadPart);
       } else {
         this->_errno = GetLastError();
         SetError("Failed");
@@ -124,8 +122,8 @@ public:
     obj.Set("dev", Number::New(Env(), this->_dev));
     obj.Set("size", Number::New(Env(), this->_size));
     obj.Set("attributes", Number::New(Env(), this->_attributes));
-    obj.Set("mTimeMs", Number::New(Env(), this->_mTimeMs));
     obj.Set("cTimeMs", Number::New(Env(), this->_cTimeMs));
+    obj.Set("mTimeMs", Number::New(Env(), this->_mTimeMs));
     Callback().Call({Env().Null(), obj});
   }
   void OnError(const Napi::Error &error) override {
@@ -139,8 +137,8 @@ private:
   int64_t _dev;
   uint64_t _size;
   int _attributes;
-  double _mTimeMs;
   double _cTimeMs;
+  double _mTimeMs;
   int _errno;
 };
 
@@ -158,50 +156,57 @@ public:
         OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
 
     if (h_dir == INVALID_HANDLE_VALUE) {
+      this->_errno = GetLastError();
       SetError("Open Failed");
     } else {
-      char buffer[8192];
+      constexpr size_t BUFFER_SIZE = 16 * 4096;
+      char *pbuf = new char[BUFFER_SIZE];
       IO_STATUS_BLOCK ioStatus = {0};
       const NTSTATUS start = NtQueryDirectoryFileEx(
-          h_dir, 0, nullptr, nullptr, &ioStatus, buffer, sizeof(buffer),
+          h_dir, 0, nullptr, nullptr, &ioStatus, pbuf, BUFFER_SIZE,
           FileDirectoryInformation, SL_RESTART_SCAN, nullptr);
 
-      printf("start: 0x%x\n", start);
       if (start != 0) {
-        SetError("NtQueryDirectoryFileEx failed");
+        this->_errno = GetLastError();
+        SetError("Start failed");
       } else {
-        char *curr = buffer;
+        char *pcurr = pbuf;
         while (true) {
-          FILE_DIRECTORY_INFORMATION *info =
-              reinterpret_cast<FILE_DIRECTORY_INFORMATION *>(curr);
-
-          this->_results.push_back({
-              .name = std::u16string(
-                  reinterpret_cast<const char16_t *>(info.FileName),
-                  info.FileNameLength),
-              .size = info.EndOfFile.QuadPart,
-              .attributes = info.FileAttributes,
-              .mTimeMs = _filetimeToUnixMs(info.LastWriteTime.QuadPart),
-              .cTimeMs = _filetimeToUnixMs(info.ChangeTime.QuadPart),
-          });
-
-          if (info->NextEntryOffset != 0) {
-            curr += info->NextEntryOffset;
+          FILE_DIRECTORY_INFORMATION *pinfo =
+              reinterpret_cast<FILE_DIRECTORY_INFORMATION *>(pcurr);
+          if (!((pinfo->FileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
+                ((pinfo->FileNameLength == 4 && pinfo->FileName[0] == L'.' &&
+                  pinfo->FileName[1] == L'.') ||
+                 (pinfo->FileNameLength == 2 && pinfo->FileName[0] == L'.')))) {
+            this->_results.push_back({
+                .name = std::u16string(
+                    reinterpret_cast<const char16_t *>(pinfo->FileName),
+                    pinfo->FileNameLength / 2),
+                .size = (uint64_t)pinfo->EndOfFile.QuadPart,
+                .attributes = (int)pinfo->FileAttributes,
+                .cTimeMs = _filetimeToUnixMs(pinfo->ChangeTime.QuadPart),
+                .mTimeMs = _filetimeToUnixMs(pinfo->LastWriteTime.QuadPart),
+            });
+          }
+          if (pinfo->NextEntryOffset != 0) {
+            pcurr += pinfo->NextEntryOffset;
           } else {
             const NTSTATUS status = NtQueryDirectoryFileEx(
-                h_dir, 0, nullptr, nullptr, &ioStatus, buffer, sizeof(buffer),
+                h_dir, 0, nullptr, nullptr, &ioStatus, pbuf, BUFFER_SIZE,
                 FileDirectoryInformation, 0, nullptr);
             if (status == STATUS_NO_MORE_FILES) {
               break;
             } else if (!NT_SUCCESS(status)) {
+              this->_errno = GetLastError();
               SetError("Continue Failed");
               break;
             } else {
-              curr = buffer;
+              pcurr = pbuf;
             }
           }
         }
       }
+      delete pbuf;
       CloseHandle(h_dir);
     }
   }
@@ -214,9 +219,9 @@ public:
       obj.Set("name", String::New(Env(), this->_results[i].name));
       obj.Set("size", Number::New(Env(), this->_results[i].size));
       obj.Set("attributes", Number::New(Env(), this->_results[i].attributes));
-      obj.Set("mTimeMs", Number::New(Env(), this->_results[i].mTimeMs));
       obj.Set("cTimeMs", Number::New(Env(), this->_results[i].cTimeMs));
-      array[i] = obj;
+      obj.Set("mTimeMs", Number::New(Env(), this->_results[i].mTimeMs));
+      array.Set(i, obj);
     }
     Callback().Call({Env().Null(), array});
   }
@@ -300,6 +305,10 @@ Object Init(Napi::Env env, Object exports) {
   exports.Set("setAttributes", Function::New(env, SetAttributes));
   exports.Set("getAttributes", Function::New(env, GetAttributes));
   exports.Set("queryDirectory", Function::New(env, QueryDirectory));
+
+  if (pGetFileInformationByName == NULL) {
+    exports.Set("_slowApi", Napi::Boolean::New(env, true));
+  }
   return exports;
 }
 NODE_API_MODULE(NODE_GYP_MODULE_NAME, Init)
