@@ -168,11 +168,11 @@ function test(path, done) {
         console.log(path, 'failed');
         console.log('    a:', a_err, a_result);
         console.log('    fs:', fs_err, fs_result);
+        console.log('--------');
       } else {
         success_count++;
-        console.log(path, 'success');
+        //console.log(path, 'success');
       }
-      console.log('--------');
 
       done();
     }
