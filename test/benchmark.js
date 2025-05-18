@@ -1,7 +1,9 @@
 const FileAttrib = require('../dist/index.js');
+
 const async = require('async');
-const { join: pathJoin } = require('path');
 const fs = require('node:fs');
+const { readdirFast } = require('node-windows-readdir-fast');
+const { join: pathJoin } = require('node:path');
 
 const start_path = process.argv[2];
 
@@ -13,8 +15,9 @@ console.log('start_path:', start_path);
 console.log('');
 
 const BENCHMARKS = {
-  'readdir without stat call': _readDir,
+  'readdir without stat call': _readdir,
   queryDirectory: _queryDirectory,
+  readdirFast: _readdirFast,
 };
 async.eachSeries(
   _shuffle(Object.keys(BENCHMARKS)),
@@ -37,7 +40,7 @@ async.eachSeries(
   }
 );
 
-function _readDir(done) {
+function _readdir(done) {
   const dir_list = [start_path];
   let count = 0;
   async.forever(
@@ -97,6 +100,41 @@ function _queryDirectory(done) {
           }
           done(err);
         });
+      }
+    },
+    (err) => {
+      if (err === 'stop') {
+        err = null;
+      }
+      done(err, count);
+    }
+  );
+}
+function _readdirFast(done) {
+  const dir_list = [start_path];
+  let count = 0;
+  async.forever(
+    (done) => {
+      const path = dir_list.pop();
+      if (!path) {
+        done('stop');
+      } else {
+        readdirFast(path, false).then(
+          (results) => {
+            results.forEach((result) => {
+              if (result.isDirectory) {
+                dir_list.push(pathJoin(path, result.name));
+              } else {
+                count++;
+              }
+            });
+            done();
+          },
+          (err) => {
+            console.error('err:', err, path);
+            done(err);
+          }
+        );
       }
     },
     (err) => {
