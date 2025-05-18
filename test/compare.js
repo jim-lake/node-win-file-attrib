@@ -7,6 +7,8 @@ const PATH_LIST = [
   'C:\\foobar',
   'C:\\pagefile.sys',
   'D:\\',
+  'C:\\Windows',
+  'C:\\Windows\\system32',
   'C:\\Windows\\system32\\notepad.exe',
   'K:\\',
   '\\.\\illegal',
@@ -39,6 +41,7 @@ function test(path, done) {
       },
     ],
     () => {
+      let fail = false;
       if (a_err && fs_err) {
         if (a_err.code === fs_err.code) {
           console.log(path, 'success with error:', a_err.code);
@@ -51,11 +54,14 @@ function test(path, done) {
             fs_err.code,
             '0x' + a_err?.errno?.toString?.(16)
           );
+          fail = true;
         }
       } else if (a_err && !fs_err) {
         console.error('failed:', path, a_err);
+        fail = true;
       } else if (!a_err && fs_err) {
         console.error('failed:', path, fs_err);
+        fail = true;
       } else {
         if (a_result.size !== fs_result.size) {
           console.log(
@@ -65,6 +71,7 @@ function test(path, done) {
             '!=',
             fs_result.size
           );
+          fail = true;
         }
         if (a_result.ctimeMs !== fs_result.ctimeMs) {
           console.log(
@@ -74,6 +81,7 @@ function test(path, done) {
             '!=',
             fs_result.ctimeMs
           );
+          fail = true;
         }
         if (a_result.mtimeMs !== fs_result.mtimeMs) {
           console.log(
@@ -83,8 +91,20 @@ function test(path, done) {
             '!=',
             fs_result.mtimeMs
           );
+          fail = true;
         }
       }
+      console.log('');
+      if (fail) {
+        console.log(path, 'failed');
+        console.log('    a:', a_err, a_result);
+        console.log('    fs:', fs_err, fs_result);
+      } else {
+        console.log(path, 'success');
+      }
+      console.log('');
+      console.log('--------');
+
       done();
     }
   );
