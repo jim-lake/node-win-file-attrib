@@ -21,8 +21,8 @@ typedef struct {
   std::u16string name;
   uint64_t size;
   unsigned int attributes;
-  double cTimeMs;
-  double mTimeMs;
+  double ctimeMs;
+  double mtimeMs;
 } WindowsDirent;
 
 class SetWorker : public AsyncWorker {
@@ -79,8 +79,8 @@ public:
     if (NT_SUCCESS(status)) {
       this->_size = info.EndOfFile.QuadPart;
       this->_attributes = info.FileAttributes;
-      this->_cTimeMs = _filetimeToUnixMs(info.ChangeTime.QuadPart);
-      this->_mTimeMs = _filetimeToUnixMs(info.LastWriteTime.QuadPart);
+      this->_ctimeMs = _filetimeToUnixMs(info.ChangeTime.QuadPart);
+      this->_mtimeMs = _filetimeToUnixMs(info.LastWriteTime.QuadPart);
     } else if (status == 0xc000000d) {
       HANDLE h_file = CreateFileW(
           reinterpret_cast<LPCWSTR>(this->_path.c_str()), FILE_READ_ATTRIBUTES,
@@ -95,9 +95,9 @@ public:
           this->_size <<= 32;
           this->_size += info.nFileSizeLow;
           this->_attributes = info.dwFileAttributes;
-          this->_mTimeMs =
+          this->_mtimeMs =
               _filetimeToUnixMs(*((int64_t *)&info.ftLastWriteTime));
-          this->_cTimeMs = this->_mTimeMs;
+          this->_ctimeMs = this->_mtimeMs;
         } else {
           this->_errno = GetLastError();
           SetError("Failed");
@@ -117,8 +117,8 @@ public:
     const auto obj = Object::New(Env());
     obj.Set("size", Number::New(Env(), this->_size));
     obj.Set("attributes", Number::New(Env(), this->_attributes));
-    obj.Set("cTimeMs", Number::New(Env(), this->_cTimeMs));
-    obj.Set("mTimeMs", Number::New(Env(), this->_mTimeMs));
+    obj.Set("ctimeMs", Number::New(Env(), this->_ctimeMs));
+    obj.Set("mtimeMs", Number::New(Env(), this->_mtimeMs));
     Callback().Call({Env().Null(), obj});
   }
   void OnError(const Napi::Error &error) override {
@@ -131,8 +131,8 @@ private:
   std::u16string _path;
   uint64_t _size;
   unsigned int _attributes;
-  double _cTimeMs;
-  double _mTimeMs;
+  double _ctimeMs;
+  double _mtimeMs;
   unsigned int _errno;
 };
 
@@ -178,8 +178,8 @@ public:
                     pinfo->FileNameLength / 2),
                 .size = (uint64_t)pinfo->EndOfFile.QuadPart,
                 .attributes = pinfo->FileAttributes,
-                .cTimeMs = _filetimeToUnixMs(pinfo->ChangeTime.QuadPart),
-                .mTimeMs = _filetimeToUnixMs(pinfo->LastWriteTime.QuadPart),
+                .ctimeMs = _filetimeToUnixMs(pinfo->ChangeTime.QuadPart),
+                .mtimeMs = _filetimeToUnixMs(pinfo->LastWriteTime.QuadPart),
             });
           }
           if (pinfo->NextEntryOffset != 0) {
@@ -213,8 +213,8 @@ public:
       obj.Set("name", String::New(Env(), this->_results[i].name));
       obj.Set("size", Number::New(Env(), this->_results[i].size));
       obj.Set("attributes", Number::New(Env(), this->_results[i].attributes));
-      obj.Set("cTimeMs", Number::New(Env(), this->_results[i].cTimeMs));
-      obj.Set("mTimeMs", Number::New(Env(), this->_results[i].mTimeMs));
+      obj.Set("ctimeMs", Number::New(Env(), this->_results[i].ctimeMs));
+      obj.Set("mtimeMs", Number::New(Env(), this->_results[i].mtimeMs));
       array.Set(i, obj);
     }
     Callback().Call({Env().Null(), array});

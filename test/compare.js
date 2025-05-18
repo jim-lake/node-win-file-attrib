@@ -24,7 +24,7 @@ function test(path, done) {
   async.parallel(
     [
       (done) => {
-        FileAttrib.getAttribute(path, (err, result) => {
+        FileAttrib.getAttributes(path, (err, result) => {
           a_err = err;
           a_result = result;
           done();
@@ -38,7 +38,7 @@ function test(path, done) {
         });
       },
     ],
-    (err) => {
+    () => {
       if (a_err && fs_err) {
         if (a_err.code === fs_err.code) {
           console.log(path, 'success with error:', a_err.code);
@@ -48,13 +48,14 @@ function test(path, done) {
             'fail error mismatch:',
             a_err.code,
             '!=',
-            fs_err.code
+            fs_err.code,
+            '0x' + a_err?.errno?.toString?.(16)
           );
         }
       } else if (a_err && !fs_err) {
-        console.error('failed:', path, err);
+        console.error('failed:', path, a_err);
       } else if (!a_err && fs_err) {
-        console.error('failed:', path, err);
+        console.error('failed:', path, fs_err);
       } else {
         if (a_result.size !== fs_result.size) {
           console.log(
@@ -65,22 +66,22 @@ function test(path, done) {
             fs_result.size
           );
         }
-        if (a_result.cTimeMs !== fs_result.cTimeMs) {
+        if (a_result.ctimeMs !== fs_result.ctimeMs) {
           console.log(
             path,
-            'fail cTime mismatch:',
-            a_result.cTimeMs,
+            'fail ctime mismatch:',
+            a_result.ctimeMs,
             '!=',
-            fs_result.cTimeMs
+            fs_result.ctimeMs
           );
         }
-        if (a_result.mTimeMs !== fs_result.mTimeMs) {
+        if (a_result.mtimeMs !== fs_result.mtimeMs) {
           console.log(
             path,
-            'fail mTime mismatch:',
-            a_result.mTimeMs,
+            'fail mtime mismatch:',
+            a_result.mtimeMs,
             '!=',
-            fs_result.mTimeMs
+            fs_result.mtimeMs
           );
         }
       }
