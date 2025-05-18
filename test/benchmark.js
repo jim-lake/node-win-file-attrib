@@ -16,7 +16,7 @@ const BENCHMARKS = {
   'queryDirectory': _queryDirectory,
 };
 async.eachSeries(
-  Object.keys(BENCHMARKS),
+  _shuffle(Object.keys(BENCHMARKS)),
   (name, done) => {
     const func = BENCHMARKS[name];
     console.time(name);
@@ -27,6 +27,7 @@ async.eachSeries(
       } else {
         console.log(name, 'count:', count);
       }
+      console.log("");
       done(err);
     });
   },
@@ -104,4 +105,13 @@ function _queryDirectory(done) {
       done(err, count);
     }
   );
+}
+function _shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+  return array;
 }
