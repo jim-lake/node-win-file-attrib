@@ -29,11 +29,11 @@ async.eachSeries(
         console.log(name, 'count:', count);
       }
       console.log('');
-      done(err);
+      done();
     });
   },
-  (err) => {
-    console.log('done err:', err);
+  () => {
+    console.log('done done');
   }
 );
 
