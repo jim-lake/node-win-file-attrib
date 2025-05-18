@@ -50,7 +50,8 @@ export function queryDirectory(
   path: string,
   done: (err: Error | null, files: WindowsDirent[]) => void
 ) {
-  const error = addon.queryDirectory(path, (err, files) => {
+  const full = '\\\\?\\' + pathResolve(path);
+  const error = addon.queryDirectory(full, (err, files) => {
     if (err) {
       _addErrorCode(err);
     }

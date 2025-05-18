@@ -30,7 +30,8 @@ function setAttributes(path, attributes, done) {
   }
 }
 function queryDirectory(path, done) {
-  const error = addon.queryDirectory(path, (err, files) => {
+  const full = '\\\\?\\' + (0, node_path_1.resolve)(path);
+  const error = addon.queryDirectory(full, (err, files) => {
     if (err) {
       _addErrorCode(err);
     }
