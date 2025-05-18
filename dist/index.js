@@ -96,13 +96,14 @@ class AttributeHelper {
     return Boolean(this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_TEMPORARY);
   }
 }
+class GetResult extends AttributeHelper {}
 function getAttributes(path, done) {
   const full = '\\??\\' + (0, node_path_1.resolve)(path);
   const error = addon.getAttributes(full, (err, result) => {
     if (err) {
       _addErrorCode(err);
     } else {
-      result.__proto__ = AttributeHelper.prototype;
+      result.__proto__ = GetResult.prototype;
     }
     done(err, result);
   });
@@ -121,6 +122,7 @@ function setAttributes(path, attributes, done) {
     throw new Error(error);
   }
 }
+class WindowsDirent extends AttributeHelper {}
 function queryDirectory(path, done) {
   const full = '\\\\?\\' + (0, node_path_1.resolve)(path);
   const error = addon.queryDirectory(full, (err, files) => {
@@ -129,7 +131,7 @@ function queryDirectory(path, done) {
     } else {
       const len = files.length;
       for (let i = 0; i < len; i++) {
-        files[i].__proto__ = AttributeHelper.prototype;
+        files[i].__proto__ = WindowsDirent.prototype;
       }
     }
     done(err, files);

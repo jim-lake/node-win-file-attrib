@@ -37,8 +37,8 @@ const NOT_FILE =
   FILE_ATTRIBUTE.FILE_ATTRIBUTE_REPARSE_POINT |
   FILE_ATTRIBUTE.FILE_ATTRIBUTE_DIRECTORY;
 
-class AttributeHelper {
-  attributes: number;
+abstract class AttributeHelper {
+  abstract attributes: number;
   isDirectory() {
     return (
       this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_DIRECTORY &&
@@ -69,12 +69,12 @@ class AttributeHelper {
     return Boolean(this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_TEMPORARY);
   }
 }
-type GetResult = {
+class GetResult extends AttributeHelper {
   size: number;
   attributes: number;
   ctimeMs: number;
   mtimeMs: number;
-} & AttributeHelper;
+}
 export function getAttributes(
   path: string,
   done: (err: Error | null, result: GetResult) => void
@@ -84,7 +84,7 @@ export function getAttributes(
     if (err) {
       _addErrorCode(err);
     } else {
-      result.__proto__ = AttributeHelper.prototype;
+      result.__proto__ = GetResult.prototype;
     }
     done(err, result);
   });
@@ -107,13 +107,13 @@ export function setAttributes(
     throw new Error(error);
   }
 }
-type WindowsDirent = {
+class WindowsDirent extends AttributeHelper {
   name: string;
   size: number;
   attributes: number;
   ctimeMs: number;
   mtimeMs: number;
-} & AttributeHelper;
+}
 export function queryDirectory(
   path: string,
   done: (err: Error | null, files: WindowsDirent[]) => void
@@ -125,7 +125,7 @@ export function queryDirectory(
     } else {
       const len = files.length;
       for (let i = 0; i < len; i++) {
-        files[i].__proto__ = AttributeHelper.prototype;
+        files[i].__proto__ = WindowsDirent.prototype;
       }
     }
     done(err, files);
