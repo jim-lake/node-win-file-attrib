@@ -3,7 +3,7 @@ const FileAttrib = require('../dist/index.js');
 const async = require('async');
 const fs = require('node:fs');
 const { readdirFast } = require('node-windows-readdir-fast');
-const { join: pathJoin } = require('node:path');
+const { join: pathJoin, resolve: pathResolve } = require('node:path');
 
 const start_path = process.argv[2];
 
@@ -111,7 +111,7 @@ function _queryDirectory(done) {
   );
 }
 function _readdirFast(done) {
-  const dir_list = [start_path];
+  const dir_list = [pathResolve(start_path)];
   let count = 0;
   async.forever(
     (done) => {
