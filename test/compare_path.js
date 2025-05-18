@@ -25,8 +25,8 @@ _queryDirectory(start_path, (err, path_list) => {
   }
 });
 
-function _queryDirectory(done) {
-  const dir_list = [start_path];
+function _queryDirectory(begin, done) {
+  const dir_list = [begin];
   const result_list = [];
   async.forever(
     (done) => {
