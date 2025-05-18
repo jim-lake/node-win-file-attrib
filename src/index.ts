@@ -103,7 +103,7 @@ export function queryDirectory(
     } else {
       const len = files.length;
       for (let i = 0; i < len; i++) {
-        files[i].prototype = WindowsDirent.prototype;
+        files[i].__proto__ = WindowsDirent.prototype;
       }
     }
     done(err, files);

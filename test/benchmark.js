@@ -87,13 +87,9 @@ function _queryDirectory(done) {
             console.error('err:', err, path);
           } else {
             results.forEach((result) => {
-              if (result.attributes & 0x40) {
-                // device
-              } else if (result.attributes & 0x400) {
-                // reparse
-              } else if (result.attributes & 0x10) {
+              if (result.isDirectory()) {
                 dir_list.push(pathJoin(path, result.name));
-              } else {
+              } else if (result.isFile()) {
                 count++;
               }
             });
