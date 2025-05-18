@@ -10,6 +10,7 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 0,
       '@typescript-eslint/no-require-imports': 0,
+      '@typescript-eslint/no-duplicate-enum-values': 0,
     },
     languageOptions: {
       globals: {

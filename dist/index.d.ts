@@ -29,12 +29,22 @@ export declare enum FILE_ATTRIBUTE {
   FILE_ATTRIBUTE_RECALL_ON_OPEN = 262144,
   FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 4194304,
 }
+declare class AttributeHelper {
+  attributes: number;
+  isDirectory(): boolean;
+  isFile(): boolean;
+  isSymbolicLink(): boolean;
+  isHidden(): boolean;
+  isSystem(): boolean;
+  isReadOnly(): boolean;
+  isTemporary(): boolean;
+}
 type GetResult = {
   size: number;
   attributes: number;
   ctimeMs: number;
   mtimeMs: number;
-};
+} & AttributeHelper;
 export declare function getAttributes(
   path: string,
   done: (err: Error | null, result: GetResult) => void
@@ -44,15 +54,13 @@ export declare function setAttributes(
   attributes: number,
   done?: (err: Error | null) => void
 ): void;
-declare class WindowsDirent {
+type WindowsDirent = {
   name: string;
   size: number;
   attributes: number;
   ctimeMs: number;
   mtimeMs: number;
-  isDirectory(): boolean;
-  isFile(): number | boolean;
-}
+} & AttributeHelper;
 export declare function queryDirectory(
   path: string,
   done: (err: Error | null, files: WindowsDirent[]) => void

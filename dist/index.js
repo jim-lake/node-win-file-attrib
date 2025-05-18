@@ -58,11 +58,51 @@ var FILE_ATTRIBUTE;
     (FILE_ATTRIBUTE['FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS'] = 4194304)
   ] = 'FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS';
 })(FILE_ATTRIBUTE || (exports.FILE_ATTRIBUTE = FILE_ATTRIBUTE = {}));
+const NOT_DIR =
+  FILE_ATTRIBUTE.FILE_ATTRIBUTE_DEVICE |
+  FILE_ATTRIBUTE.FILE_ATTRIBUTE_REPARSE_POINT;
+const NOT_FILE =
+  FILE_ATTRIBUTE.FILE_ATTRIBUTE_DEVICE |
+  FILE_ATTRIBUTE.FILE_ATTRIBUTE_REPARSE_POINT |
+  FILE_ATTRIBUTE.FILE_ATTRIBUTE_DIRECTORY;
+class AttributeHelper {
+  isDirectory() {
+    return (
+      this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_DIRECTORY &&
+      !(this.attributes & NOT_DIR)
+    );
+  }
+  isFile() {
+    return Boolean(
+      this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_NORMAL ||
+        !(this.attributes & NOT_FILE)
+    );
+  }
+  isSymbolicLink() {
+    return Boolean(
+      this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_REPARSE_POINT
+    );
+  }
+  isHidden() {
+    return Boolean(this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_HIDDEN);
+  }
+  isSystem() {
+    return Boolean(this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_SYSTEM);
+  }
+  isReadOnly() {
+    return Boolean(this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_READONLY);
+  }
+  isTemporary() {
+    return Boolean(this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_TEMPORARY);
+  }
+}
 function getAttributes(path, done) {
   const full = '\\??\\' + (0, node_path_1.resolve)(path);
   const error = addon.getAttributes(full, (err, result) => {
     if (err) {
       _addErrorCode(err);
+    } else {
+      result.__proto__ = AttributeHelper.prototype;
     }
     done(err, result);
   });
@@ -81,27 +121,6 @@ function setAttributes(path, attributes, done) {
     throw new Error(error);
   }
 }
-const NOT_DIR =
-  FILE_ATTRIBUTE.FILE_ATTRIBUTE_DEVICE |
-  FILE_ATTRIBUTE.FILE_ATTRIBUTE_REPARSE_POINT;
-const NOT_FILE =
-  FILE_ATTRIBUTE.FILE_ATTRIBUTE_DEVICE |
-  FILE_ATTRIBUTE.FILE_ATTRIBUTE_REPARSE_POINT |
-  FILE_ATTRIBUTE.FILE_ATTRIBUTE_DIRECTORY;
-class WindowsDirent {
-  isDirectory() {
-    return (
-      this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_DIRECTORY &&
-      !(this.attributes & NOT_DIR)
-    );
-  }
-  isFile() {
-    return (
-      this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_NORMAL ||
-      !(this.attributes & NOT_FILE)
-    );
-  }
-}
 function queryDirectory(path, done) {
   const full = '\\\\?\\' + (0, node_path_1.resolve)(path);
   const error = addon.queryDirectory(full, (err, files) => {
@@ -110,7 +129,7 @@ function queryDirectory(path, done) {
     } else {
       const len = files.length;
       for (let i = 0; i < len; i++) {
-        files[i].__proto__ = WindowsDirent.prototype;
+        files[i].__proto__ = AttributeHelper.prototype;
       }
     }
     done(err, files);
