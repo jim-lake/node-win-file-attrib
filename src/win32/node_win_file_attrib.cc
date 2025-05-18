@@ -15,8 +15,6 @@ static inline double _filetimeToUnixMs(int64_t filetime) {
   return double(filetime) / TICKS_PER_MSEC;
 }
 
-static sGetFileInformationByName pGetFileInformationByName = NULL;
-
 using namespace Napi;
 
 typedef struct {
@@ -291,20 +289,9 @@ Value QueryDirectory(const Napi::CallbackInfo &info) {
   return ret;
 }
 Object Init(Napi::Env env, Object exports) {
-  HMODULE api_win_core_file_module =
-      GetModuleHandleA("api-ms-win-core-file-l2-1-4.dll");
-  if (api_win_core_file_module != NULL) {
-    pGetFileInformationByName = (sGetFileInformationByName)GetProcAddress(
-        api_win_core_file_module, "GetFileInformationByName");
-  }
-
   exports.Set("setAttributes", Function::New(env, SetAttributes));
   exports.Set("getAttributes", Function::New(env, GetAttributes));
   exports.Set("queryDirectory", Function::New(env, QueryDirectory));
-
-  if (pGetFileInformationByName == NULL) {
-    exports.Set("_slowApi", Napi::Boolean::New(env, true));
-  }
   return exports;
 }
 NODE_API_MODULE(NODE_GYP_MODULE_NAME, Init)

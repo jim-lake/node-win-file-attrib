@@ -23,8 +23,8 @@
     "build-ts": "tsc && npm run pretty",
     "build": "npm run build-native && npm run build-ts",
     "pretty": "prettier --write binding.gyp --parser json && npm run pretty-code",
-    "pretty-code": "prettier -u --write src/**/*.ts dist/**/*.js dist/**/*.ts example/**/* && clang-format -i src/win32/*",
-    "lint": "eslint src"
+    "pretty-code": "prettier -u --write src/**/*.ts dist/**/*.js dist/**/*.ts example/**/* test/**/* && clang-format -i src/win32/*",
+    "lint": "eslint src example test"
   },
   "dependencies": {
     "bindings": "^1.5.0",

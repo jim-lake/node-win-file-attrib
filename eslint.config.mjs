@@ -11,5 +11,12 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 0,
       '@typescript-eslint/no-require-imports': 0,
     },
+    languageOptions: {
+      globals: {
+        require: 'readonly',
+        console: 'readonly',
+        process: 'readonly',
+      },
+    },
   },
 );

@@ -1,7 +1,7 @@
 import { resolve as pathResolve } from 'node:path';
 const addon = require('../build/Release/node_win_file_attrib.node');
 
-export default { getAttributes, setAttributes, queryDirectory, _slowApi };
+export default { getAttributes, setAttributes, queryDirectory };
 
 type GetResult = {
   size: number;
@@ -44,7 +44,4 @@ export function queryDirectory(
   if (error) {
     throw new Error(error);
   }
-}
-export function _slowApi() {
-  return addon?._slowApi;
 }
