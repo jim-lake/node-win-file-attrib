@@ -82,11 +82,11 @@ function _queryDirectory(done) {
             console.error('err:', err);
           } else {
             results.forEach((result) => {
-              if (result.attribues & 0x10) {
+              if (result.attributes & 0x10) {
                 dir_list.push(pathJoin(path, result.name));
-              } else if (result.attribues & 0x40) {
+              } else if (result.attributes & 0x40) {
                 // device
-              } else if (result.attribues & 0x400) {
+              } else if (result.attributes & 0x400) {
                 // reparse
               } else {
                 count++;
