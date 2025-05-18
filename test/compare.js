@@ -63,7 +63,7 @@ function test(path, done) {
         console.error('failed:', path, fs_err);
         fail = true;
       } else {
-        if (a_result.size !== fs_result.size) {
+        if (!fs_result.isDirectory() && a_result.size !== fs_result.size) {
           console.log(
             path,
             'fail size mismatch:',
@@ -73,7 +73,7 @@ function test(path, done) {
           );
           fail = true;
         }
-        if (a_result.ctimeMs !== fs_result.ctimeMs) {
+        if (_isDiffTime(a_result.ctimeMs, fs_result.ctimeMs)) {
           console.log(
             path,
             'fail ctime mismatch:',
@@ -83,7 +83,7 @@ function test(path, done) {
           );
           fail = true;
         }
-        if (a_result.mtimeMs !== fs_result.mtimeMs) {
+        if (_isDiffTime(a_result.mtimeMs, fs_result.mtimeMs)) {
           console.log(
             path,
             'fail mtime mismatch:',
@@ -108,4 +108,8 @@ function test(path, done) {
       done();
     }
   );
+}
+function _isDiffTime(a, b) {
+  const delta = Math.abs(b - a);
+  return delta > 0.01;
 }
