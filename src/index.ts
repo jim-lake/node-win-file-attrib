@@ -60,8 +60,8 @@ export function queryDirectory(
     throw new Error(error);
   }
 }
-function _addErrorCode(error: Error) {
-  switch (error.errno) {
+function _addErrorCode(error: any) {
+  switch (error?.errno) {
     case 0xc0000034:
     case 0xc000003a:
       error.code = 'ENOENT';
