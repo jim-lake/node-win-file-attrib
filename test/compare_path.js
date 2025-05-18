@@ -14,13 +14,21 @@ console.log('');
 
 let success_count = 0;
 let fail_count = 0;
+let a_b_mismatch = 0;
 
 _queryDirectory(start_path, (err, path_list) => {
   if (err) {
     console.log('query err:', err);
   } else {
     async.eachSeries(path_list, test, () => {
-      console.log('done: success:', success_count, 'fail:', fail_count);
+      console.log(
+        'done: success:',
+        success_count,
+        'fail:',
+        fail_count,
+        'a_b_mismatch:',
+        a_b_mismatch
+      );
     });
   }
 });
@@ -173,12 +181,13 @@ function test(path, done) {
 function _isDiffTime(a, fs, b) {
   const delta_fs = Math.abs(fs - a);
   if (delta_fs) {
-    console.log('diff_fs:', a, fs);
+    //console.log('diff_fs:', a, fs);
   }
   if (b) {
     const delta_ab = Math.abs(b - a);
     if (delta_ab) {
       console.log('diff_ab:', a, b);
+      a_b_mismatch++;
     }
   }
   return delta_fs > 0.01;
