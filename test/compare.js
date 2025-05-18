@@ -14,8 +14,11 @@ const PATH_LIST = [
   '\\.\\illegal',
 ];
 
+let success_count = 0;
+let fail_count = 0;
+
 async.eachSeries(PATH_LIST, test, () => {
-  console.log();
+  console.log('done: success:', success_count, 'fail:', fail_count);
 });
 
 function test(path, done) {
@@ -43,9 +46,7 @@ function test(path, done) {
     () => {
       let fail = false;
       if (a_err && fs_err) {
-        if (a_err.code === fs_err.code) {
-          console.log(path, 'success with error:', a_err.code);
-        } else {
+        if (a_err.code !== fs_err.code) {
           console.log(
             path,
             'fail error mismatch:',
@@ -94,15 +95,15 @@ function test(path, done) {
           fail = true;
         }
       }
-      console.log('');
       if (fail) {
+        fail_count++;
         console.log(path, 'failed');
         console.log('    a:', a_err, a_result);
         console.log('    fs:', fs_err, fs_result);
       } else {
+        success_count++;
         console.log(path, 'success');
       }
-      console.log('');
       console.log('--------');
 
       done();
