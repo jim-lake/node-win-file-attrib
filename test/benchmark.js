@@ -114,31 +114,27 @@ function _readdirFast(done) {
   const dir_list = [pathResolve(start_path)];
   let count = 0;
   async.forever(
-    (done) => {
+    async () => {
       const path = dir_list.pop();
       if (!path) {
-        done('stop');
+        throw 'stop';
       } else {
-        readdirFast(path, false).then(
-          (results) => {
-            results.forEach((result) => {
-              if (result.isDirectory) {
-                dir_list.push(pathJoin(path, result.name));
-              } else {
-                count++;
-              }
-            });
-            done();
-          },
-          (err) => {
-            console.error('err:', err, path);
-            done(err);
+        for (const result of await readdirFast(path, false)) {
+          //console.log("result:", result);
+          if (result.attributes & 0x40) {
+            // device
+          } else if (result.attributes & 0x400) {
+            // reparse
+          } else if (result.attributes & 0x10) {
+            dir_list.push(pathJoin(path, result.name));
+          } else {
+            count++;
           }
-        );
+        }
       }
     },
     (err) => {
-      if (err === 'stop') {
+      if (err.message === 'stop') {
         err = null;
       }
       done(err, count);
@@ -154,3 +150,26 @@ function _shuffle(array) {
   }
   return array;
 }
+/*
+async function _test() {
+  console.log("_test");
+  for (const result of await readdirFast(start_path, false)) {
+    console.log("result:", result);
+  }
+  console.log("_test done");
+}
+_test();
+
+async function awaitTest() {
+	const beforeAwait = Date.now();
+	let countAwait = 0;
+	for (const entry of await readdirFast('C:\\temp', false)) {
+		console.log(entry);
+		countAwait += 1;
+	}
+	const afterAwait = Date.now();
+	console.log(`await ${afterAwait - beforeAwait}ms`);
+	console.log(countAwait);
+}
+awaitTest();
+*/

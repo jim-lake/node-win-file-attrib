@@ -153,7 +153,7 @@ public:
       this->_errno = GetLastError();
       SetError("Open Failed");
     } else {
-      constexpr size_t BUFFER_SIZE = 16 * 4096;
+      constexpr size_t BUFFER_SIZE = 64 * 4096;
       char *pbuf = new char[BUFFER_SIZE];
       IO_STATUS_BLOCK ioStatus = {0};
       const NTSTATUS start = NtQueryDirectoryFileEx(
