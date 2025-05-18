@@ -48,7 +48,7 @@ function _readDir(done) {
       } else {
         fs.readdir(path, { withFileTypes: true }, (err, results) => {
           if (err) {
-            console.error('err:', err);
+            console.error('err:', err, path);
           } else {
             results.forEach((result) => {
               if (result.isDirectory()) {
@@ -81,7 +81,7 @@ function _queryDirectory(done) {
       } else {
         FileAttrib.queryDirectory(path, (err, results) => {
           if (err) {
-            console.error('err:', err);
+            console.error('err:', err, path);
           } else {
             results.forEach((result) => {
               if (result.attributes & 0x10) {
