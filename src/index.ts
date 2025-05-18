@@ -4,69 +4,63 @@ const addon = require('../build/Release/node_win_file_attrib.node');
 export default { getAttributes, setAttributes, queryDirectory };
 
 export enum FILE_ATTRIBUTE {
-  FILE_ATTRIBUTE_READONLY = 0x1,
-  FILE_ATTRIBUTE_HIDDEN = 0x2,
-  FILE_ATTRIBUTE_SYSTEM = 0x4,
-  FILE_ATTRIBUTE_FAT_VOLUME = 0x8,
-  FILE_ATTRIBUTE_DIRECTORY = 0x10,
-  FILE_ATTRIBUTE_ARCHIVE = 0x20,
-  FILE_ATTRIBUTE_DEVICE = 0x40,
-  FILE_ATTRIBUTE_NORMAL = 0x80,
-  FILE_ATTRIBUTE_TEMPORARY = 0x100,
-  FILE_ATTRIBUTE_SPARSE_FILE = 0x200,
-  FILE_ATTRIBUTE_REPARSE_POINT = 0x400,
-  FILE_ATTRIBUTE_COMPRESSED = 0x800,
-  FILE_ATTRIBUTE_OFFLINE = 0x1000,
-  FILE_ATTRIBUTE_NOT_CONTENT_INDEXED = 0x2000,
-  FILE_ATTRIBUTE_ENCRYPTED = 0x4000,
-  FILE_ATTRIBUTE_INTEGRITY_STREAM = 0x8000,
-  FILE_ATTRIBUTE_VIRTUAL = 0x10000,
-  FILE_ATTRIBUTE_NO_SCRUB_DATA = 0x20000,
-  FILE_ATTRIBUTE_EA = 0x40000,
-  FILE_ATTRIBUTE_PINNED = 0x80000,
-  FILE_ATTRIBUTE_UNPINNED = 0x100000,
-  FILE_ATTRIBUTE_RECALL_ON_OPEN = 0x40000,
-  FILE_ATTRIBUTE_RECALL_ON_DATA_ACCESS = 0x400000,
+  READONLY = 0x1,
+  HIDDEN = 0x2,
+  SYSTEM = 0x4,
+  FAT_VOLUME = 0x8,
+  DIRECTORY = 0x10,
+  ARCHIVE = 0x20,
+  DEVICE = 0x40,
+  NORMAL = 0x80,
+  TEMPORARY = 0x100,
+  SPARSE_FILE = 0x200,
+  REPARSE_POINT = 0x400,
+  COMPRESSED = 0x800,
+  OFFLINE = 0x1000,
+  NOT_CONTENT_INDEXED = 0x2000,
+  ENCRYPTED = 0x4000,
+  INTEGRITY_STREAM = 0x8000,
+  VIRTUAL = 0x10000,
+  NO_SCRUB_DATA = 0x20000,
+  EA = 0x40000,
+  PINNED = 0x80000,
+  UNPINNED = 0x100000,
+  RECALL_ON_OPEN = 0x40000,
+  RECALL_ON_DATA_ACCESS = 0x400000,
 }
 
-const NOT_DIR =
-  FILE_ATTRIBUTE.FILE_ATTRIBUTE_DEVICE |
-  FILE_ATTRIBUTE.FILE_ATTRIBUTE_REPARSE_POINT;
+const NOT_DIR = FILE_ATTRIBUTE.DEVICE | FILE_ATTRIBUTE.REPARSE_POINT;
 const NOT_FILE =
-  FILE_ATTRIBUTE.FILE_ATTRIBUTE_DEVICE |
-  FILE_ATTRIBUTE.FILE_ATTRIBUTE_REPARSE_POINT |
-  FILE_ATTRIBUTE.FILE_ATTRIBUTE_DIRECTORY;
+  FILE_ATTRIBUTE.DEVICE |
+  FILE_ATTRIBUTE.REPARSE_POINT |
+  FILE_ATTRIBUTE.DIRECTORY;
 
 abstract class AttributeHelper {
   abstract attributes: number;
   isDirectory() {
     return (
-      this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_DIRECTORY &&
-      !(this.attributes & NOT_DIR)
+      this.attributes & FILE_ATTRIBUTE.DIRECTORY && !(this.attributes & NOT_DIR)
     );
   }
   isFile() {
     return Boolean(
-      this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_NORMAL ||
-        !(this.attributes & NOT_FILE)
+      this.attributes & FILE_ATTRIBUTE.NORMAL || !(this.attributes & NOT_FILE)
     );
   }
   isSymbolicLink() {
-    return Boolean(
-      this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_REPARSE_POINT
-    );
+    return Boolean(this.attributes & FILE_ATTRIBUTE.REPARSE_POINT);
   }
   isHidden() {
-    return Boolean(this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_HIDDEN);
+    return Boolean(this.attributes & FILE_ATTRIBUTE.HIDDEN);
   }
   isSystem() {
-    return Boolean(this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_SYSTEM);
+    return Boolean(this.attributes & FILE_ATTRIBUTE.SYSTEM);
   }
   isReadOnly() {
-    return Boolean(this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_READONLY);
+    return Boolean(this.attributes & FILE_ATTRIBUTE.READONLY);
   }
   isTemporary() {
-    return Boolean(this.attributes & FILE_ATTRIBUTE.FILE_ATTRIBUTE_TEMPORARY);
+    return Boolean(this.attributes & FILE_ATTRIBUTE.TEMPORARY);
   }
 }
 class GetResult extends AttributeHelper {
