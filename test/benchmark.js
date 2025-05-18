@@ -10,10 +10,11 @@ if (!start_path) {
   process.exit(-1);
 }
 console.log('start_path:', start_path);
+console.log('');
 
 const BENCHMARKS = {
   'readdir without stat call': _readDir,
-  'queryDirectory': _queryDirectory,
+  queryDirectory: _queryDirectory,
 };
 async.eachSeries(
   _shuffle(Object.keys(BENCHMARKS)),
@@ -27,7 +28,7 @@ async.eachSeries(
       } else {
         console.log(name, 'count:', count);
       }
-      console.log("");
+      console.log('');
       done(err);
     });
   },
