@@ -39,7 +39,7 @@ declare abstract class AttributeHelper {
   isReadOnly(): boolean;
   isTemporary(): boolean;
 }
-declare class GetResult extends AttributeHelper {
+export declare class GetResult extends AttributeHelper {
   size: number;
   attributes: number;
   ctimeMs: number;
@@ -54,7 +54,7 @@ export declare function setAttributes(
   attributes: number,
   done?: (err: Error | null) => void
 ): void;
-declare class WindowsDirent extends AttributeHelper {
+export declare class WindowsDirent extends AttributeHelper {
   name: string;
   size: number;
   attributes: number;

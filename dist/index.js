@@ -1,6 +1,6 @@
 'use strict';
 Object.defineProperty(exports, '__esModule', { value: true });
-exports.FILE_ATTRIBUTE = void 0;
+exports.WindowsDirent = exports.GetResult = exports.FILE_ATTRIBUTE = void 0;
 exports.getAttributes = getAttributes;
 exports.setAttributes = setAttributes;
 exports.queryDirectory = queryDirectory;
@@ -70,6 +70,7 @@ class AttributeHelper {
   }
 }
 class GetResult extends AttributeHelper {}
+exports.GetResult = GetResult;
 function getAttributes(path, done) {
   const full = '\\??\\' + (0, node_path_1.resolve)(path);
   const error = addon.getAttributes(full, (err, result) => {
@@ -96,6 +97,7 @@ function setAttributes(path, attributes, done) {
   }
 }
 class WindowsDirent extends AttributeHelper {}
+exports.WindowsDirent = WindowsDirent;
 function queryDirectory(path, done) {
   const full = '\\\\?\\' + (0, node_path_1.resolve)(path);
   const error = addon.queryDirectory(full, (err, files) => {

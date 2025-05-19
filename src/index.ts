@@ -63,7 +63,7 @@ abstract class AttributeHelper {
     return Boolean(this.attributes & FILE_ATTRIBUTE.TEMPORARY);
   }
 }
-class GetResult extends AttributeHelper {
+export class GetResult extends AttributeHelper {
   size: number;
   attributes: number;
   ctimeMs: number;
@@ -101,7 +101,7 @@ export function setAttributes(
     throw new Error(error);
   }
 }
-class WindowsDirent extends AttributeHelper {
+export class WindowsDirent extends AttributeHelper {
   name: string;
   size: number;
   attributes: number;
