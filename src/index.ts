@@ -91,7 +91,8 @@ export function setAttributes(
   attributes: number,
   done?: (err: NodeJS.ErrnoException | null) => void
 ) {
-  const error = addon.setAttributes(path, attributes, (err) => {
+  const full = '\\\\?\\' + pathResolve(path);
+  const error = addon.setAttributes(full, attributes, (err) => {
     if (err && done) {
       _addErrorCode(err);
     }

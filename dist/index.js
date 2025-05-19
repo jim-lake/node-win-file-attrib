@@ -86,7 +86,8 @@ function getAttributes(path, done) {
   }
 }
 function setAttributes(path, attributes, done) {
-  const error = addon.setAttributes(path, attributes, (err) => {
+  const full = '\\\\?\\' + (0, node_path_1.resolve)(path);
+  const error = addon.setAttributes(full, attributes, (err) => {
     if (err && done) {
       _addErrorCode(err);
     }
