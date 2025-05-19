@@ -156,12 +156,12 @@ public:
       constexpr size_t BUFFER_SIZE = 64 * 4096;
       char *pbuf = new char[BUFFER_SIZE];
       IO_STATUS_BLOCK ioStatus = {0};
-      const NTSTATUS start = NtQueryDirectoryFileEx(
+      const NTSTATUS start_status = NtQueryDirectoryFileEx(
           h_dir, 0, nullptr, nullptr, &ioStatus, pbuf, BUFFER_SIZE,
           FileDirectoryInformation, SL_RESTART_SCAN, nullptr);
 
-      if (start != 0) {
-        this->_errno = GetLastError();
+      if (!NT_SUCCESS(start_status)) {
+        this->_errno = start_status;
         SetError("Start failed");
       } else {
         char *pcurr = pbuf;
@@ -191,7 +191,7 @@ public:
             if (status == STATUS_NO_MORE_FILES) {
               break;
             } else if (!NT_SUCCESS(status)) {
-              this->_errno = GetLastError();
+              this->_errno = status;
               SetError("Continue Failed");
               break;
             } else {

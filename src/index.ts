@@ -130,12 +130,18 @@ export function queryDirectory(
 }
 function _addErrorCode(error: any) {
   switch (error?.errno) {
+    case 0x2:
+    case 0x3:
     case 0xc0000034:
     case 0xc000003a:
       error.code = 'ENOENT';
       break;
+    case 0x20:
     case 0xc0000043:
       error.code = 'EBUSY';
+      break;
+    case 0xc000000d:
+      error.code = 'ENOTDIR';
       break;
   }
 }
