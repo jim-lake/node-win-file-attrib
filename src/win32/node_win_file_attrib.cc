@@ -88,19 +88,22 @@ public:
           OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
 
       if (h_file != INVALID_HANDLE_VALUE) {
-        BY_HANDLE_FILE_INFORMATION info;
-        const auto success = GetFileInformationByHandle(h_file, &info);
-        if (success) {
-          this->_size = info.nFileSizeHigh;
-          this->_size <<= 32;
-          this->_size += info.nFileSizeLow;
-          this->_attributes = info.dwFileAttributes;
-          this->_mtimeMs =
-              _filetimeToUnixMs(*((int64_t *)&info.ftLastWriteTime));
-          this->_ctimeMs = this->_mtimeMs;
+        IO_STATUS_BLOCK io_status2{0};
+        FILE_ALL_INFORMATION all_info;
+        const auto all_status = NtQueryInformationFile(
+            h_file, &io_status2, &all_info, sizeof(all_info),
+            (FILE_INFORMATION_CLASS)FileAllInformation);
+
+        if (NT_ERROR(all_status)) {
+          this->_errno = all_status;
+          SetError("All Failed");
         } else {
-          this->_errno = GetLastError();
-          SetError("Failed");
+          this->_size = all_info.StandardInformation.EndOfFile.QuadPart;
+          this->_attributes = all_info.BasicInformation.FileAttributes;
+          this->_ctimeMs =
+              _filetimeToUnixMs(all_info.BasicInformation.ChangeTime.QuadPart);
+          this->_mtimeMs = _filetimeToUnixMs(
+              all_info.BasicInformation.LastWriteTime.QuadPart);
         }
         CloseHandle(h_file);
       } else {
