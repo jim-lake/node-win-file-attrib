@@ -13,6 +13,14 @@ const PATH_LIST = [
   'C:\\Windows\\system32\\notepad.exe',
   'K:\\',
   '\\.\\illegal',
+  'C:/',
+  'C:/foobar',
+  'C:/pagefile.sys',
+  'D:/',
+  'C:/Windows',
+  'C:/Windows/system32',
+  'C:/Windows/system32/notepad.exe',
+  'K:/',
 ];
 
 let success_count = 0;
