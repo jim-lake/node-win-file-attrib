@@ -71,7 +71,7 @@ export class GetResult extends AttributeHelper {
 }
 export function getAttributes(
   path: string,
-  done: (err: Error | null, result: GetResult) => void
+  done: (err: NodeJS.ErrnoException | null, result: GetResult) => void
 ) {
   const full = '\\??\\' + pathResolve(path);
   const error = addon.getAttributes(full, (err, result) => {
@@ -89,7 +89,7 @@ export function getAttributes(
 export function setAttributes(
   path: string,
   attributes: number,
-  done?: (err: Error | null) => void
+  done?: (err: NodeJS.ErrnoException | null) => void
 ) {
   const error = addon.setAttributes(path, attributes, (err) => {
     if (err && done) {
@@ -110,7 +110,7 @@ export class WindowsDirent extends AttributeHelper {
 }
 export function queryDirectory(
   path: string,
-  done: (err: Error | null, files: WindowsDirent[]) => void
+  done: (err: NodeJS.ErrnoException | null, files: WindowsDirent[]) => void
 ) {
   const full = '\\\\?\\' + pathResolve(path);
   const error = addon.queryDirectory(full, (err, files) => {
@@ -128,7 +128,7 @@ export function queryDirectory(
     throw new Error(error);
   }
 }
-function _addErrorCode(error: any) {
+function _addErrorCode(error: NodeJS.ErrnoException) {
   switch (error?.errno) {
     case 0x2:
     case 0x3:

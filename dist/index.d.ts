@@ -47,12 +47,12 @@ export declare class GetResult extends AttributeHelper {
 }
 export declare function getAttributes(
   path: string,
-  done: (err: Error | null, result: GetResult) => void
+  done: (err: NodeJS.ErrnoException | null, result: GetResult) => void
 ): void;
 export declare function setAttributes(
   path: string,
   attributes: number,
-  done?: (err: Error | null) => void
+  done?: (err: NodeJS.ErrnoException | null) => void
 ): void;
 export declare class WindowsDirent extends AttributeHelper {
   name: string;
@@ -63,5 +63,5 @@ export declare class WindowsDirent extends AttributeHelper {
 }
 export declare function queryDirectory(
   path: string,
-  done: (err: Error | null, files: WindowsDirent[]) => void
+  done: (err: NodeJS.ErrnoException | null, files: WindowsDirent[]) => void
 ): void;
