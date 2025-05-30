@@ -1,6 +1,6 @@
 {
   "name": "node-win-file-attrib",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Windows File Attribute Query And Update Wrapper",
   "keywords": [
     "win32",

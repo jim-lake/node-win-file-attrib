@@ -25,7 +25,7 @@ typedef enum _NT_DIRECTORY_QUERY_FLAGS {
   SL_INDEX_SPECIFIED = 0x04
 } NT_DIRECTORY_QUERY_FLAGS;
 
-typedef struct _FILE_STAT_INFORMATION {
+typedef struct {
   LARGE_INTEGER FileId;
   LARGE_INTEGER CreationTime;
   LARGE_INTEGER LastAccessTime;
@@ -37,7 +37,7 @@ typedef struct _FILE_STAT_INFORMATION {
   ULONG ReparseTag;
   ULONG NumberOfLinks;
   ACCESS_MASK EffectiveAccess;
-} FILE_STAT_INFORMATION, *PFILE_STAT_INFORMATION;
+} MY_FILE_STAT_INFORMATION;
 typedef struct _FILE_BASIC_INFORMATION {
   LARGE_INTEGER CreationTime;
   LARGE_INTEGER LastAccessTime;

@@ -72,7 +72,7 @@ public:
                                NULL);
 
     IO_STATUS_BLOCK io_status{0};
-    FILE_STAT_INFORMATION info;
+    MY_FILE_STAT_INFORMATION info;
     const NTSTATUS status =
         NtQueryInformationByName(&attribs, &io_status, &info, sizeof(info),
                                  (FILE_INFORMATION_CLASS)FileStatInformation);
