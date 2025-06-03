@@ -124,6 +124,10 @@ function _addErrorCode(error) {
     case 0xc000003a:
       error.code = 'ENOENT';
       break;
+    case 0x5:
+    case 0x41:
+      error.code = 'EPERM';
+      break;
     case 0x20:
     case 0xc0000043:
       error.code = 'EBUSY';
