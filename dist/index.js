@@ -126,6 +126,8 @@ function _addErrorCode(error) {
       break;
     case 0x5:
     case 0x41:
+    case 0xc0000022:
+    case 0xc00000ca:
       error.code = 'EPERM';
       break;
     case 0x20:
